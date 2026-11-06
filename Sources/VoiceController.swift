@@ -44,7 +44,7 @@ final class VoiceController: ObservableObject {
             fail("On-device speech recognition is unavailable for the current language.")
             return
         }
-        let url = FileManager.default.temporaryDirectory.appendingPathComponent("AgentDrop-\(UUID().uuidString).m4a")
+        let url = FileManager.default.temporaryDirectory.appendingPathComponent("Homies-\(UUID().uuidString).m4a")
         do {
             let engine = AVAudioEngine()
             let input = engine.inputNode

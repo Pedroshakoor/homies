@@ -98,7 +98,13 @@ struct LocalStore {
     let root: URL
     init(root: URL? = nil) throws {
         self.root = root ?? FileManager.default.urls(for: .applicationSupportDirectory, in: .userDomainMask)[0]
-            .appendingPathComponent("AgentDrop", isDirectory: true)
+            .appendingPathComponent("Homies", isDirectory: true)
+        if root == nil, !FileManager.default.fileExists(atPath: self.root.path) {
+            let previous = self.root.deletingLastPathComponent().appendingPathComponent("AgentDrop", isDirectory: true)
+            if FileManager.default.fileExists(atPath: previous.path) {
+                try FileManager.default.copyItem(at: previous, to: self.root)
+            }
+        }
         try FileManager.default.createDirectory(at: self.root, withIntermediateDirectories: true,
                                                attributes: [.posixPermissions: 0o700])
     }

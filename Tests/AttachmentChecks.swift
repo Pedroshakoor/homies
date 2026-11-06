@@ -1,7 +1,7 @@
 import Foundation
 @main struct AttachmentChecks {
     static func main() async throws {
-        let root = FileManager.default.temporaryDirectory.appendingPathComponent("AgentDrop-attachment-\(UUID().uuidString)")
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("Homies-attachment-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: root) }
         let file = root.appendingPathComponent("context file.txt")

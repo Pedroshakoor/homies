@@ -11,9 +11,9 @@ Frontend/dist/
 *.pem
 *.p12
 *.key
-AgentDrop_full_prompt.md
+*_full_prompt.md
 ref_*.png
-Resources/AgentDrop.gif
+Resources/*.gif
 Resources/MenuIcon/
 Resources/claude.png
 Resources/codex.png

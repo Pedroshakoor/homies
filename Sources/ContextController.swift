@@ -14,7 +14,7 @@ final class ContextController: NSObject, NSDraggingSource, NSFilePromiseProvider
     private let maximumAttachmentSize = 25 * 1024 * 1024
     private let root: URL
 
-    init(root: URL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("AgentDrop", isDirectory: true)) {
+    init(root: URL = FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Homies", isDirectory: true)) {
         self.root = root
         super.init()
     }
@@ -27,7 +27,7 @@ final class ContextController: NSObject, NSDraggingSource, NSFilePromiseProvider
             case .invalidFile: return "The attachment must be a regular file."
             case .tooLarge: return "Attachments must be 25 MB or smaller."
             case .noCaptureTarget: return "The selected screen or window is no longer available."
-            case .screenPermission: return "Allow AgentDrop in System Settings > Privacy & Security > Screen & System Audio Recording, then try again. You may need to restart AgentDrop."
+            case .screenPermission: return "Allow Homies in System Settings > Privacy & Security > Screen & System Audio Recording, then try again. You may need to restart Homies."
             case .imageEncoding: return "Could not encode the image as PNG."
             }
         }

@@ -1,15 +1,15 @@
 #!/bin/zsh
 set -euo pipefail
 cd "${0:A:h:h}"
-app="$PWD/build/Piko.app"
+app="$PWD/build/Homies.app"
 /usr/bin/codesign --verify --strict "$app"
-stage="$(mktemp -d /Applications/.Piko-install.XXXXXX)"
-/usr/bin/ditto "$app" "$stage/Piko.app"
-/usr/bin/codesign --verify --strict "$stage/Piko.app"
-if [[ -e /Applications/Piko.app ]]; then
-  mv /Applications/Piko.app "/private/tmp/Piko-previous-$(uuidgen).app"
+stage="$(mktemp -d /Applications/.Homies-install.XXXXXX)"
+/usr/bin/ditto "$app" "$stage/Homies.app"
+/usr/bin/codesign --verify --strict "$stage/Homies.app"
+if [[ -e /Applications/Homies.app ]]; then
+  mv /Applications/Homies.app "/private/tmp/Homies-previous-$(uuidgen).app"
 fi
-mv "$stage/Piko.app" /Applications/Piko.app
+mv "$stage/Homies.app" /Applications/Homies.app
 rmdir "$stage"
-/usr/bin/codesign --verify --strict /Applications/Piko.app
-print 'Installed: /Applications/Piko.app'
+/usr/bin/codesign --verify --strict /Applications/Homies.app
+print 'Installed: /Applications/Homies.app'

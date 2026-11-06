@@ -22,13 +22,13 @@ type Chat = { id: string; name: string; preview: string; cwd: string; date: numb
 type HistoryResult = { chats?: Chat[]; cursor?: string | null; append?: boolean; error?: string; resumed?: boolean }
 declare global {
   interface Window {
-    webkit?: { messageHandlers: { agentdrop: { postMessage: (payload: Record<string, unknown>) => void } } }
-    agentDrop: { receive: (state: NativeState) => void; history: (result: HistoryResult) => void }
+    webkit?: { messageHandlers: { homies: { postMessage: (payload: Record<string, unknown>) => void } } }
+    homies: { receive: (state: NativeState) => void; history: (result: HistoryResult) => void }
   }
 }
 const retentionOptions = [{ value: 0, label: 'Never' }, { value: 1, label: '1 day' }, { value: 3, label: '3 days' }, { value: 7, label: '1 week' }, { value: 30, label: '1 month' }]
 const clientId = `${Date.now()}-${Math.random().toString(36).slice(2)}`
-const post = (action: string, payload: Record<string, unknown> = {}) => window.webkit?.messageHandlers.agentdrop.postMessage({ action, client: clientId, ...payload })
+const post = (action: string, payload: Record<string, unknown> = {}) => window.webkit?.messageHandlers.homies.postMessage({ action, client: clientId, ...payload })
 const logo = (agent: Agent) => agent.kind === 'codex' ? './openai.svg' : agent.kind === 'hermes' ? './hermes.svg' : './claude.svg'
 const dateLabel = (timestamp: number) => {
   const date = new Date(timestamp * 1000)
@@ -70,7 +70,7 @@ export default function App() {
   const agent = native?.agents.find(item => item.id === native.selectedId)
   const lastMessageText = agent?.messages.at(-1)?.text
   useEffect(() => {
-    window.agentDrop = {
+    window.homies = {
       receive: state => {
         setNative(state)
         document.documentElement.classList.toggle('dark', state.dark)
@@ -113,7 +113,7 @@ export default function App() {
     setHistoryBusy(true); setHistoryError(null)
     post('history', { id: agent.id, search, ...(cursor ? { cursor } : {}) })
   }
-  if (!native || !agent) return <div className="app-shell loading-shell"><img src="./AppAvatar.png" alt="Piko" /><span>Opening your agents…</span></div>
+  if (!native || !agent) return <div className="app-shell loading-shell"><img src="./AppAvatar.png" alt="Homies" /><span>Opening your agents…</span></div>
   const selectAgent = (id: string) => { setSettings(false); setHistory(false); post('select', { id }); setTimeout(() => textarea.current?.focus(), 50) }
   return <TooltipProvider delayDuration={400}><main className={`app-shell ${native.expanded ? 'expanded' : ''}`} onDragOver={event => { if (event.dataTransfer.types.includes('Files')) event.preventDefault() }} onDrop={event => { if (event.dataTransfer.files.length) { event.preventDefault(); importFiles(event.dataTransfer.files, agent.id) } }} onKeyDown={event => {
     if (event.key === 'Escape' && !settings && !history && !event.defaultPrevented) post('close')
@@ -191,7 +191,7 @@ export default function App() {
         <section className="setting-section"><div className="setting-heading">History clears after</div><Select value={String(agent.retention)} onValueChange={value => post('retention', { id: agent.id, value: Number(value) })}><SelectTrigger className="glass-select"><SelectValue /></SelectTrigger><SelectContent className="glass-menu">{retentionOptions.map(option => <SelectItem value={String(option.value)} key={option.value}>{option.label}</SelectItem>)}</SelectContent></Select></section>
         <div className="setting-buttons"><Button variant="ghost" className="glass-button" disabled={agent.running} onClick={() => { post('new', { id: agent.id }); setSettings(false) }}>New session</Button><Button variant="ghost" className="glass-button" onClick={() => post('reveal', { id: agent.id })}>Show files</Button></div>
         <p className="setting-note">{agent.kind === 'codex' ? 'Uses your Codex account, settings, and project context.' : agent.kind === 'claudeCode' ? 'Uses your Claude Code account. Approvals are handled in Terminal.' : 'Hermes uses your configured provider. Model changes start a new session.'}</p>
-        <Button variant="ghost" className="quiet-button" onClick={() => post('quit')}>Quit Piko</Button>
+        <Button variant="ghost" className="quiet-button" onClick={() => post('quit')}>Quit Homies</Button>
       </div></ScrollArea>
     </DialogContent></Dialog>
     <Dialog open={history} onOpenChange={setHistory}><DialogContent className="glass-dialog history-dialog translate-x-0 translate-y-0">

@@ -152,7 +152,7 @@ import Combine
         Task {
             if config.adapterType == .hermes, config.binaryPath.hasSuffix("/.runtime/hermes"), let session = conversation.sessionID {
                 do {
-                    let result = try await LocalCommand.run(binary: config.binaryPath, arguments: ["--agentdrop-interrupt", session], environment: environment)
+                    let result = try await LocalCommand.run(binary: config.binaryPath, arguments: ["--homies-interrupt", session], environment: environment)
                     if result.status != 0 { self.error = "Could not confirm that Hermes stopped. Continue in Terminal to check the run." }
                 } catch { self.error = error.localizedDescription }
             }

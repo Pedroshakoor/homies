@@ -34,7 +34,7 @@ enum LocalCommand {
     static func shellQuote(_ value: String) -> String { "'" + value.replacingOccurrences(of: "'", with: "'\\''") + "'" }
     static func loginScript(config: AgentConfiguration, environment: CLIEnvironment) -> String {
         let arguments = config.adapterType == .codex ? "login" : config.adapterType == .hermes ? "setup model" : "auth login"
-        return "#!/bin/zsh\nexport PATH=\(shellQuote(environment.path))\n\(shellQuote(config.binaryPath)) \(arguments)\nprint '\nReturn to AgentDrop and click Refresh login.'\n"
+        return "#!/bin/zsh\nexport PATH=\(shellQuote(environment.path))\n\(shellQuote(config.binaryPath)) \(arguments)\nprint '\nReturn to Homies and click Refresh login.'\n"
     }
 }
 
@@ -75,12 +75,12 @@ enum CodexHistory {
                 var data = try JSONSerialization.data(withJSONObject: object); data.append(10)
                 try stdin.fileHandleForWriting.write(contentsOf: data)
             }
-            try write(["id": 1, "method": "initialize", "params": ["clientInfo": ["name": "agentdrop", "version": "0.1.0"]]])
+            try write(["id": 1, "method": "initialize", "params": ["clientInfo": ["name": "homies", "version": "0.1.0"]]])
             var buffer = Data()
             while true {
                 let data = stdout.fileHandleForReading.availableData
                 if data.isEmpty { break }; buffer.append(data)
-                guard buffer.count <= 32 * 1024 * 1024 else { throw AppError.message("This chat is too large to preview in AgentDrop.") }
+                guard buffer.count <= 32 * 1024 * 1024 else { throw AppError.message("This chat is too large to preview in Homies.") }
                 while let index = buffer.firstIndex(of: 10) {
                     let line = Data(buffer[..<index]); buffer.removeSubrange(...index)
                     guard let object = try JSONSerialization.jsonObject(with: line) as? [String: Any], let id = object["id"] as? Int else { continue }

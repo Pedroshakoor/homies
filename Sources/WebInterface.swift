@@ -62,9 +62,9 @@ struct WebConversationView: NSViewRepresentable {
         config.websiteDataStore = .nonPersistent()
         let root = Bundle.main.resourceURL!.appendingPathComponent("Frontend", isDirectory: true)
         let assets = BundledAssets(root: root)
-        config.setURLSchemeHandler(assets, forURLScheme: "agentdrop")
+        config.setURLSchemeHandler(assets, forURLScheme: "homies")
         context.coordinator.assets = assets
-        config.userContentController.add(context.coordinator, name: "agentdrop")
+        config.userContentController.add(context.coordinator, name: "homies")
         let webView = TransparentWebView(frame: .zero, configuration: config)
         // macOS WebKit's page painter is separate from isOpaque and the overscroll color.
         // Keep it transparent so the native behind-window material can sample the desktop.
@@ -76,12 +76,12 @@ struct WebConversationView: NSViewRepresentable {
         webView.appearanceChanged = { [weak coordinator = context.coordinator] in coordinator?.pushState() }
         context.coordinator.webView = webView
         context.coordinator.monitorDrag()
-        webView.load(URLRequest(url: URL(string: "agentdrop://app/index.html")!, cachePolicy: .reloadIgnoringLocalCacheData))
+        webView.load(URLRequest(url: URL(string: "homies://app/index.html")!, cachePolicy: .reloadIgnoringLocalCacheData))
         return webView
     }
     func updateNSView(_ nsView: WKWebView, context: Context) { context.coordinator.pushState() }
     static func dismantleNSView(_ nsView: WKWebView, coordinator: WebCoordinator) {
-        nsView.configuration.userContentController.removeScriptMessageHandler(forName: "agentdrop")
+        nsView.configuration.userContentController.removeScriptMessageHandler(forName: "homies")
         coordinator.stopMonitoring()
     }
 }
@@ -106,7 +106,7 @@ struct WebConversationView: NSViewRepresentable {
     func stopMonitoring() { if let mouseMonitor { NSEvent.removeMonitor(mouseMonitor) }; mouseMonitor = nil }
     private func mediaURL(_ url: URL, id: String) -> String {
         assets?.attachments[id] = url
-        return "agentdrop://attachment/" + id
+        return "homies://attachment/" + id
     }
     private func attachmentState(_ file: Attachment) -> [String: Any] {
         var result: [String: Any] = ["id": file.id.uuidString, "name": file.name, "path": file.url.path, "kind": file.kind]
@@ -154,10 +154,10 @@ struct WebConversationView: NSViewRepresentable {
                                    "accent": accent,
                                    "voice": ["state": voiceState, "levels": runtime.voice.levels, "error": runtime.voice.error ?? runtime.error ?? ""],
                                    "hotkey": ["keyCode": runtime.keyCode, "modifiers": runtime.modifiers, "label": runtime.label]]
-        webView.callAsyncJavaScript("window.agentDrop?.receive(state); if (focusComposer) requestAnimationFrame(() => document.querySelector('textarea')?.focus())", arguments: ["state": state, "focusComposer": focusComposer], in: nil, in: .page) { _ in }
+        webView.callAsyncJavaScript("window.homies?.receive(state); if (focusComposer) requestAnimationFrame(() => document.querySelector('textarea')?.focus())", arguments: ["state": state, "focusComposer": focusComposer], in: nil, in: .page) { _ in }
     }
     func userContentController(_ userContentController: WKUserContentController, didReceive message: WKScriptMessage) {
-        guard message.frameInfo.isMainFrame, message.webView?.url?.scheme == "agentdrop",
+        guard message.frameInfo.isMainFrame, message.webView?.url?.scheme == "homies",
               let payload = message.body as? [String: Any], let action = payload["action"] as? String else { return }
         let id = payload["id"] as? String ?? selection.selectedID
         guard let model = selection.models.first(where: { $0.id == id }) else { return }
@@ -262,9 +262,9 @@ struct WebConversationView: NSViewRepresentable {
         pushState()
     }
     private func historyResponse(_ result: [String: Any]) {
-        webView?.callAsyncJavaScript("window.agentDrop?.history(result)", arguments: ["result": result], in: nil, in: .page) { _ in }
+        webView?.callAsyncJavaScript("window.homies?.history(result)", arguments: ["result": result], in: nil, in: .page) { _ in }
     }
     func webView(_ webView: WKWebView, decidePolicyFor navigationAction: WKNavigationAction, decisionHandler: @escaping (WKNavigationActionPolicy) -> Void) {
-        decisionHandler(navigationAction.request.url?.scheme == "agentdrop" ? .allow : .cancel)
+        decisionHandler(navigationAction.request.url?.scheme == "homies" ? .allow : .cancel)
     }
 }

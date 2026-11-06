@@ -7,11 +7,10 @@ let destination = URL(fileURLWithPath: CommandLine.arguments[2], isDirectory: tr
 let avatarURL = URL(fileURLWithPath: CommandLine.arguments[3])
 guard let source = CGImageSourceCreateWithURL(sourceURL as CFURL, nil),
       let original = CGImageSourceCreateImageAtIndex(source, 0, nil) else { fatalError("App artwork could not be decoded") }
-// Crop the supplied Piko mascot tightly enough to read at menu-bar sizes.
-// Keep the yellow field and original artwork; only the empty outer canvas is trimmed.
-let side = Int(Double(original.height) * 0.40)
-let centerX = Int(Double(original.width) * 0.517)
-let centerY = Int(Double(original.height) * 0.49)
+// Preserve the full supplied wordmark and trim its empty outer canvas.
+let side = Int(Double(min(original.width, original.height)) * 0.90)
+let centerX = Int(Double(original.width) * 0.495)
+let centerY = Int(Double(original.height) * 0.52)
 let image = original.cropping(to: CGRect(x: centerX - side / 2, y: centerY - side / 2, width: side, height: side))!
 try FileManager.default.createDirectory(at: destination, withIntermediateDirectories: true)
 func render(pixels: Int, circle: Bool) -> CGImage {
@@ -38,3 +37,23 @@ for size in [16, 32, 128, 256, 512] {
     }
 }
 print("Prepared static app icon and menu avatar from the supplied artwork")
+
+// A luminance mask preserves the supplied lettering as a native menu-bar template.
+let width = original.width, height = original.height
+let maskContext = CGContext(data: nil, width: width, height: height, bitsPerComponent: 8, bytesPerRow: width * 4,
+    space: CGColorSpaceCreateDeviceRGB(), bitmapInfo: CGBitmapInfo.byteOrder32Big.rawValue | CGImageAlphaInfo.premultipliedLast.rawValue)!
+maskContext.draw(original, in: CGRect(x: 0, y: 0, width: width, height: height))
+let bytes = maskContext.data!.assumingMemoryBound(to: UInt8.self)
+var minX = width, minY = height, maxX = 0, maxY = 0
+for y in 0..<height {
+    for x in 0..<width {
+        let offset = (y * width + x) * 4
+        let luminance = UInt8((Int(bytes[offset]) + Int(bytes[offset + 1]) + Int(bytes[offset + 2])) / 3)
+        let alpha: UInt8 = luminance > 12 ? luminance : 0
+        bytes[offset] = alpha; bytes[offset + 1] = alpha; bytes[offset + 2] = alpha; bytes[offset + 3] = alpha
+        if alpha > 150 { minX = min(minX, x); minY = min(minY, y); maxX = max(maxX, x); maxY = max(maxY, y) }
+    }
+}
+precondition(minX < maxX && minY < maxY, "Wordmark has no visible lettering")
+let bounds = CGRect(x: max(0, minX - 6), y: max(0, minY - 6), width: min(width - minX + 6, maxX - minX + 13), height: min(height - minY + 6, maxY - minY + 13))
+write(maskContext.makeImage()!.cropping(to: bounds)!, to: avatarURL.deletingLastPathComponent().appendingPathComponent("HomiesMenu.png"))

@@ -4,7 +4,10 @@ import AppKit
     static let shared = AppIcon()
     let image: NSImage?
     private init() {
-        image = Bundle.main.url(forResource: "AppAvatar", withExtension: "png").flatMap(NSImage.init(contentsOf:))
-        image?.size = NSSize(width: 22, height: 22)
+        image = Bundle.main.url(forResource: "HomiesMenu", withExtension: "png").flatMap(NSImage.init(contentsOf:))
+        if let image {
+            image.size = NSSize(width: 40, height: 40 * image.size.height / image.size.width)
+            image.isTemplate = true
+        }
     }
 }

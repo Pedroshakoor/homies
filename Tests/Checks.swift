@@ -68,7 +68,7 @@ func line(_ object: [String: Any]) throws -> Data {
         print("PASS: stream parsing, sessions, denials, malformed output")
     }
     static func persistenceChecks() throws {
-        let root = FileManager.default.temporaryDirectory.appendingPathComponent("agentdrop-check-\(UUID().uuidString)")
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("homies-check-\(UUID().uuidString)")
         defer { try? FileManager.default.removeItem(at: root) }
         let store = try LocalStore(root: root)
         var conversation = Conversation(messages: [.init(role: .user, text: "old", date: Date().addingTimeInterval(-86400 * 4)), .init(role: .assistant, text: "new")], sessionID: UUID().uuidString)
@@ -89,7 +89,7 @@ func line(_ object: [String: Any]) throws -> Data {
         print("PASS: persistence, retention, corrupt-history protection")
     }
     static func processChecks() async throws {
-        let root = FileManager.default.temporaryDirectory.appendingPathComponent("agentdrop-process-\(UUID().uuidString)")
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("homies-process-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: root) }
         let fixture = root.appendingPathComponent("fake-agent")
@@ -127,7 +127,7 @@ func line(_ object: [String: Any]) throws -> Data {
         if let index = CommandLine.arguments.firstIndex(of: "--model"), CommandLine.arguments.count > index + 1 {
             config.model = CommandLine.arguments[index + 1]
         }
-        let root = FileManager.default.temporaryDirectory.appendingPathComponent("agentdrop-live-\(UUID().uuidString)")
+        let root = FileManager.default.temporaryDirectory.appendingPathComponent("homies-live-\(UUID().uuidString)")
         try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
         defer { try? FileManager.default.removeItem(at: root) }
         config.workingDirectory = root.path

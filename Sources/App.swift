@@ -37,11 +37,12 @@ struct AgentPanelView: View {
     private var tracking: NSTrackingArea?
     private var labelPanel: NSPanel?
     private var hover = false
+    private var statusDot: NSView?
     private var selectionObserver: AnyCancellable?
 
     init(models: [AgentModel]) {
         self.selection = AgentSelection(models: models)
-        item = NSStatusBar.system.statusItem(withLength: 28)
+        item = NSStatusBar.system.statusItem(withLength: 52)
         panel = ConversationPanel(contentRect: NSRect(x: 0, y: 0, width: 340, height: 520),
                                   styleMask: [.borderless, .nonactivatingPanel], backing: .buffered, defer: false)
         super.init()
@@ -51,8 +52,19 @@ struct AgentPanelView: View {
         panel.isReleasedWhenClosed = false
         panel.contentView = glassContent(AgentPanelView(selection: selection) { [weak self] in self?.expand() })
         if let button = item.button {
+            button.imageScaling = .scaleProportionallyDown
+            let dot = NSView()
+            dot.wantsLayer = true; dot.layer?.cornerRadius = 2
+            dot.translatesAutoresizingMaskIntoConstraints = false
+            button.addSubview(dot)
+            NSLayoutConstraint.activate([
+                dot.widthAnchor.constraint(equalToConstant: 4), dot.heightAnchor.constraint(equalToConstant: 4),
+                dot.trailingAnchor.constraint(equalTo: button.trailingAnchor, constant: -1),
+                dot.bottomAnchor.constraint(equalTo: button.bottomAnchor, constant: -3)
+            ])
+            statusDot = dot
             button.target = self; button.action = #selector(toggle)
-            button.setAccessibilityLabel("Piko · \(model.config.displayName), \(model.status.label)")
+            button.setAccessibilityLabel("Homies · \(model.config.displayName), \(model.status.label)")
             let area = NSTrackingArea(rect: button.bounds, options: [.mouseEnteredAndExited, .activeAlways, .inVisibleRect], owner: self)
             button.addTrackingArea(area); tracking = area
         }
@@ -60,7 +72,7 @@ struct AgentPanelView: View {
         selectionObserver = selection.$selectedID.dropFirst().sink { [weak self] _ in
             DispatchQueue.main.async {
                 guard let self else { return }
-                self.window?.title = self.model.config.displayName + " · Piko"
+                self.window?.title = self.model.config.displayName + " · Homies"
                 self.redraw()
             }
         }
@@ -82,32 +94,10 @@ struct AgentPanelView: View {
         }
     }
     func redraw() {
-        let image = NSImage(size: NSSize(width: 24, height: 24), flipped: false) { [model, hover] rect in
-            let inset: CGFloat = hover ? 0 : 1.5
-            let circle = rect.insetBy(dx: inset, dy: inset)
-            if let icon = AppIcon.shared.image {
-                icon.draw(in: hover ? rect : rect.insetBy(dx: 1, dy: 1))
-                let dot = NSBezierPath(ovalIn: NSRect(x: 18, y: 1, width: 5, height: 5))
-                NSColor(model.status.color).setFill(); dot.fill()
-                NSColor.windowBackgroundColor.setStroke(); dot.lineWidth = 1; dot.stroke()
-                return true
-            }
-            let tint = model.config.avatarColor == "mint" ? NSColor(calibratedRed: 0.58, green: 0.83, blue: 0.79, alpha: 1) : NSColor(calibratedRed: 0.94, green: 0.72, blue: 0.61, alpha: 1)
-            let path = NSBezierPath(ovalIn: circle)
-            NSGradient(starting: tint.blended(withFraction: 0.32, of: .white) ?? tint, ending: tint)?.draw(in: path, angle: -70)
-            NSColor.white.withAlphaComponent(0.75).setStroke(); path.lineWidth = 1; path.stroke()
-            let paragraph = NSMutableParagraphStyle(); paragraph.alignment = .center
-            let text = model.config.avatarEmoji as NSString
-            text.draw(in: NSRect(x: circle.minX, y: circle.midY - 7, width: circle.width, height: 16), withAttributes: [
-                .font: NSFont.systemFont(ofSize: 11, weight: .semibold), .foregroundColor: NSColor.black.withAlphaComponent(0.75), .paragraphStyle: paragraph
-            ])
-            let dot = NSBezierPath(ovalIn: NSRect(x: 17, y: 1, width: 6, height: 6))
-            NSColor(model.status.color).setFill(); dot.fill()
-            NSColor.windowBackgroundColor.setStroke(); dot.lineWidth = 1; dot.stroke()
-            return true
-        }
-        image.isTemplate = false; item.button?.image = image
-        item.button?.setAccessibilityLabel("Piko · \(model.config.displayName), \(model.status.label)")
+        item.button?.image = AppIcon.shared.image
+        item.button?.toolTip = "Homies · \(model.config.displayName) · \(model.status.label)"
+        statusDot?.layer?.backgroundColor = NSColor(model.status.color).cgColor
+        item.button?.setAccessibilityLabel("Homies · \(model.config.displayName), \(model.status.label)")
     }
     @objc func mouseEntered(with event: NSEvent) {
         hover = true; redraw()
@@ -125,7 +115,7 @@ struct AgentPanelView: View {
     }
     @objc func toggle() { panel.isVisible ? close() : show() }
     func show() {
-        NotificationCenter.default.post(name: .init("AgentDropClosePanels"), object: self)
+        NotificationCenter.default.post(name: .init("HomiesClosePanels"), object: self)
         labelPanel?.orderOut(nil)
         let fallback = NSScreen.main?.visibleFrame ?? NSRect(x: 0, y: 0, width: 1440, height: 900)
         let anchor = anchorRect() ?? NSRect(x: fallback.maxX - 180, y: fallback.maxY, width: 24, height: 24)
@@ -155,7 +145,7 @@ struct AgentPanelView: View {
         if window == nil {
             let result = NSWindow(contentRect: NSRect(x: 0, y: 0, width: 620, height: 700),
                                   styleMask: [.titled, .closable, .miniaturizable, .resizable, .fullSizeContentView], backing: .buffered, defer: false)
-            result.title = model.config.displayName + " · Piko"
+            result.title = model.config.displayName + " · Homies"
             result.titlebarAppearsTransparent = true; result.titleVisibility = .hidden
             result.isOpaque = false; result.backgroundColor = .clear; result.isReleasedWhenClosed = false
             result.minSize = NSSize(width: 340, height: 460)
@@ -188,7 +178,7 @@ struct AgentPanelView: View {
             AppRuntime.shared.selectedAgent = { [weak self] in self?.controllers.first?.model }
             AppRuntime.shared.showPanel = { [weak self] in self?.controllers.first?.show() }
             AppRuntime.shared.configure()
-            closeObserver = NotificationCenter.default.addObserver(forName: .init("AgentDropClosePanels"), object: nil, queue: .main) { [weak self] notification in
+            closeObserver = NotificationCenter.default.addObserver(forName: .init("HomiesClosePanels"), object: nil, queue: .main) { [weak self] notification in
                 MainActor.assumeIsolated {
                     for controller in self?.controllers ?? [] where controller !== notification.object as? StatusController { controller.close() }
                 }
@@ -217,8 +207,8 @@ struct AgentPanelView: View {
             }
         } catch {
             let alert = NSAlert()
-            alert.messageText = "Piko could not load its local data"
-            alert.informativeText = "\(error.localizedDescription)\nExisting files have not been replaced. Check ~/Library/Application Support/AgentDrop/."
+            alert.messageText = "Homies could not load its local data"
+            alert.informativeText = "\(error.localizedDescription)\nExisting files have not been replaced. Check ~/Library/Application Support/Homies/."
             alert.runModal(); NSApp.terminate(nil)
         }
     }
@@ -235,7 +225,7 @@ struct AgentPanelView: View {
     private func createMenus() {
         let menu = NSMenu()
         let appItem = NSMenuItem(); let appMenu = NSMenu()
-        appMenu.addItem(withTitle: "Quit Piko", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
+        appMenu.addItem(withTitle: "Quit Homies", action: #selector(NSApplication.terminate(_:)), keyEquivalent: "q")
         appItem.submenu = appMenu; menu.addItem(appItem)
         let editItem = NSMenuItem(); editItem.title = "Edit"; let edit = NSMenu(title: "Edit")
         for (title, action, key) in [("Undo", "undo:", "z"), ("Cut", "cut:", "x"), ("Copy", "copy:", "c"), ("Paste", "paste:", "v"), ("Select All", "selectAll:", "a")] {
@@ -245,7 +235,7 @@ struct AgentPanelView: View {
     }
 }
 
-@main struct AgentDrop {
+@main struct Homies {
     @MainActor static func main() {
         let app = NSApplication.shared
         let delegate = AppDelegate()
