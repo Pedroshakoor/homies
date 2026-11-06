@@ -164,6 +164,11 @@ struct AgentPanelView: View {
     private var closeObserver: NSObjectProtocol?
     func applicationDidFinishLaunching(_ notification: Notification) {
         NSApp.setActivationPolicy(.regular)
+        if let iconURL = Bundle.main.url(forResource: "Homies", withExtension: "icns"),
+           let icon = NSImage(contentsOf: iconURL) {
+            NSApp.applicationIconImage = icon
+            NSApp.dockTile.display()
+        }
         if CommandLine.arguments.contains("--preview-light") { NSApp.appearance = NSAppearance(named: .aqua) }
         if CommandLine.arguments.contains("--preview-dark") { NSApp.appearance = NSAppearance(named: .darkAqua) }
         createMenus()
