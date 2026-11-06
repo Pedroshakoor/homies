@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="Resources/AppAvatar.png" alt="Homies" width="104" />
+  <img src="Resources/Homies.jpg" alt="Homies" width="600" />
 </p>
 
 <h1 align="center">Homies</h1>
