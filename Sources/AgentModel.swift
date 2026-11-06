@@ -88,11 +88,14 @@ import Combine
     }
     func newConversation() {
         guard !isRunning else { return }
-        conversation.sessionID = nil
         if !conversation.messages.isEmpty {
-            conversation.messages.append(.init(role: .notice, text: "New session · earlier messages are kept as history"))
+            do { try store.save(conversation, name: "\(id)-archive-\(UUID().uuidString).json") }
+            catch { self.error = "Could not start a new session: \(error.localizedDescription)"; return }
         }
-        status = .idle; error = nil; persist(); onStatusChanged?()
+        conversation = Conversation()
+        draftOrigin = ""; draft = ""; attachments = []; pendingVoice = nil
+        status = .idle; error = nil; activity = ""; retryable = false
+        persist(); onStatusChanged?()
     }
     func send() {
         guard canSend else { return }

@@ -220,3 +220,8 @@ button:focus-visible, [role="combobox"]:focus-visible { outline: 2px solid var(-
 @media (prefers-reduced-transparency: reduce) {
   .app-shell, .dark .app-shell, .glass-dialog, .dark .glass-dialog { background: #24262a; }
 }
+
+.session-tools { display: flex; flex: 0 0 auto; justify-content: flex-end; padding: 0 17px 6px; }
+.new-session-button { height: 25px; min-height: 0; padding: 0 8px; gap: 5px; color: var(--secondary-ink); font-size: 10px; font-weight: 450; border-radius: 9px; border: 1px solid var(--hairline); background: rgba(255,255,255,.035); }
+.new-session-button svg { width: 12px !important; height: 12px !important; stroke-width: 1.6; }
+.new-session-button:hover { color: var(--ink); background: rgba(255,255,255,.09); }

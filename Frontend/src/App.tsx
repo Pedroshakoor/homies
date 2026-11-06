@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
-import { ArrowDownLeft, ArrowUpRight, Check, ChevronDown, Clock3, Copy, Ellipsis, FolderOpen, LogIn, RefreshCw, Search, Square, AudioLines, Paperclip, CircleDot, CornerDownLeft, X } from 'lucide-react'
+import { ArrowDownLeft, ArrowUpRight, Check, ChevronDown, Clock3, Copy, Ellipsis, FolderOpen, LogIn, RefreshCw, Search, Square, AudioLines, Paperclip, CircleDot, CornerDownLeft, SquarePen, X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
@@ -142,6 +142,7 @@ export default function App() {
         <IconButton label={native.expanded ? 'Show compact panel' : 'Open full window'} onClick={() => post('expand')} >{native.expanded ? <ArrowDownLeft /> : <ArrowUpRight />}</IconButton>
       </div>
     </header>
+    <div className="session-tools"><Button variant="ghost" className="new-session-button" disabled={agent.running} onClick={() => post('new', { id: agent.id })}><SquarePen />New session</Button></div>
     <ScrollArea className="conversation-scroll">
       <div className="conversation">
         <DropdownMenu><DropdownMenuTrigger asChild><Button variant="ghost" className="retention-line">History <span>{agent.retention === 0 ? 'stays' : retentionOptions.find(item => item.value === agent.retention)?.label}</span> {agent.retention === 0 ? 'here.' : 'then clears.'}</Button></DropdownMenuTrigger>
